@@ -23,8 +23,13 @@ class RectCard():
     def fill(self):
         pygame.draw.rect(main_window, self.fill_color, self.rect)
 
+    def fill_new_color(self, new_color):
+        pygame.draw.rect(main_window, new_color, self.rect)
+
     def outline(self):
         pygame.draw.rect(main_window, self.frame_color, self.rect, self.thickness)
+    def collidepoint(self, x, y):
+        return self.rect.collidepoint(x, y)
 
 class LableCard(RectCard):
     def set_text(self, text):
@@ -41,6 +46,8 @@ class LableCard(RectCard):
 
 list_cards = list()
 
+green = (43, 255, 6)
+red = (255, 6, 6)
 x = 20
 for i in range(4):
     card = LableCard(x, 200, 100, 150, (255, 255, 255))
@@ -48,17 +55,35 @@ for i in range(4):
     list_cards.append(card)
     x+=120
 
-wait = 20
-while True:
-    index_card = randint(0, 3)
-    main_window.fill(back)
-    for i in range(len(list_cards)):
-        if index_card == i and wait !=0:
-            list_cards[i].draw_text(25, 65)
-        else:
-            list_cards[i].draw()
+wait = 0
+run = True
+while run:
+    if wait == 0:
+        main_window.fill(back)
+        index_card = randint(0, 3)
+        for i in range(len(list_cards)):
+            if index_card == i:
+                list_cards[i].draw_text(25, 65)
+            else:
+                list_cards[i].draw()
+        wait = 20
 
-    wait -=1
+    else:
+        wait -=1
+
+    for e in pygame.event.get():
+        if e.type == pygame.QUIT:
+            run = False
+        if e.type == pygame.MOUSEBUTTONDOWN:
+            x, y = e.pos
+            for i in range(len(list_cards)):
+                if list_cards[i].collidepoint(x, y):
+                    if i == index_card:
+                        list_cards[i].fill_new_color(green)
+                    else:
+                        list_cards[i].fill_new_color(red)
+
+
     clock.tick(60)
     pygame.display.update()
 
