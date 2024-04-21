@@ -5,7 +5,9 @@ import time
 pygame.init()
 
 back = (255, 229, 45)
-main_window = pygame.display.set_mode((500, 500))
+window_w = 500
+window_h = 500
+main_window = pygame.display.set_mode((window_w, window_h))
 main_window.fill(back)
 
 clock = pygame.time.Clock()
@@ -55,33 +57,84 @@ for i in range(4):
     list_cards.append(card)
     x+=120
 
+counter = LableCard(400, 10, 100, 30, back)
+counter.points = 0
+counter.frame_color = back
+counter.set_text(f'Счет: {counter.points}')
+
+restart_btn = LableCard(200, 350, 120, 40, back)
+restart_btn.set_text('Restart')
+
+timer = LableCard(0, 10, 100, 30, back)
+timer.seconds = 0
+timer.frame_color = back
+timer.set_text(f'Время: {timer.seconds}')
+
+start_time = time.time()
+curent_time = time.time()
+
 wait = 0
 run = True
+isFinish = True
 while run:
-    if wait == 0:
-        main_window.fill(back)
-        index_card = randint(0, 3)
-        for i in range(len(list_cards)):
-            if index_card == i:
-                list_cards[i].draw_text(25, 65)
-            else:
-                list_cards[i].draw()
-        wait = 20
+    next_time = time.time()
+    if isFinish:
+        counter.draw_text(0,0)
+        timer.draw_text(0,0)
+        if wait == 0:
+            main_window.fill(back)
+            index_card = randint(0, 3)
+            for i in range(len(list_cards)):
+                if index_card == i:
+                    list_cards[i].draw_text(25, 65)
+                else:
+                    list_cards[i].draw()
+            wait = 20
 
-    else:
-        wait -=1
+        else:
+            wait -=1
 
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             run = False
         if e.type == pygame.MOUSEBUTTONDOWN:
             x, y = e.pos
+            if restart_btn.collidepoint(x,y):
+                isFinish = True
+                wait = 0
+                counter.points = 0
+                counter.set_text(f'Счет: {counter.points}')
             for i in range(len(list_cards)):
                 if list_cards[i].collidepoint(x, y):
                     if i == index_card:
+                        counter.points +=1
+                        counter.set_text(f'Счет: {counter.points}')
                         list_cards[i].fill_new_color(green)
                     else:
                         list_cards[i].fill_new_color(red)
+
+    if counter.points > 2:
+        win_text = LableCard(0, 0, window_w, window_h, (3, 61, 0))
+        win_text.fill_color = (205, 255, 161)
+        win_text.frame_color = (205, 255, 161)
+        win_text.set_text('Ты победил!')
+        win_text.draw_text(window_w/2.5,window_h/2.5)
+        restart_btn.draw_text(25,5)
+        isFinish = False
+
+    if next_time - curent_time > 1:
+        curent_time = next_time
+        timer.seconds +=1
+        timer.set_text(f'Время: {timer.seconds}')
+
+    if next_time - start_time > 5:
+        lose_text = LableCard(0, 0, window_w, window_h, (3, 61, 0))
+        lose_text.fill_color = (205, 255, 161)
+        lose_text.frame_color = (205, 255, 161)
+        lose_text.set_text('Ты проиграл!')
+        lose_text.draw_text(window_w / 2.5, window_h / 2.5)
+        restart_btn.draw_text(25, 5)
+        isFinish = False
 
 
     clock.tick(60)
