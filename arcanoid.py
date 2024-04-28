@@ -2,7 +2,7 @@ import pygame
 
 pygame.init()
 
-back = (255, 229, 45)
+back = (0, 193, 190)
 window_w = 500
 window_h = 500
 main_window = pygame.display.set_mode((window_w, window_h))
@@ -47,9 +47,9 @@ class LableCard(RectCard):
         self.outline()
 
 
-def SpriteImg(RectCard):
+class SpriteImg(RectCard):
     def __init__(self, x, y, width, height, puth_img, color=back, frame_color=(0, 0, 0), thickness=0):
-        super().__init__(self, x, y, width, height, color, frame_color, thickness)
+        super().__init__(x, y, width, height, color, frame_color, thickness)
         self.image = pygame.image.load(puth_img)
 
     def draw_img(self):
@@ -66,7 +66,7 @@ width_monstr = 50
 height_monstr = 50
 count_monsters = 9
 
-x = (window_w - (count_monsters * width_monstr)) % (count_monsters - 1) // 2
+rast_monstr = width_monstr + ((window_w - (count_monsters * width_monstr)) // (count_monsters - 1))
 y = 1
 
 row = 3
@@ -74,18 +74,24 @@ row = 3
 monsters = []
 
 for i in range(row):
+    x = (window_w - (count_monsters * width_monstr)) % (count_monsters - 1) // 2 + width_monstr * i // 2
     for j in range(count_monsters):
-        monster = SpriteImg(x=x, y=y, width=width_monstr, height=height_monstr, puth_img='enemy.png')
+        monster = SpriteImg(x, y, width_monstr, height_monstr, 'enemy.png')
         monsters.append(monster)
-        x += width_monstr + ((window_w - (count_monsters * width_monstr)) // (count_monsters - 1))
-    x = (window_w - (count_monsters * width_monstr)) % (count_monsters - 1) // 2 + width_monstr // 2
-    y += height_monstr + 6
+        x += rast_monstr
+    y += height_monstr + 1
     count_monsters -= 1
+
+ball = SpriteImg(200, 300, 50, 50, 'ball.png')
+platform = SpriteImg(200, 400, 100, 25, 'platform.png')
+
 
 run = True
 while run:
     for monster in monsters:
         monster.draw_img()
+    ball.draw_img()
+    platform.draw_img()
 
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
