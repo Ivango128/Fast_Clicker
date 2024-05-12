@@ -23,19 +23,19 @@ class RectCard():
         self.thickness = thickness
 
     def fill(self):
-        pygame.draw.rect(main_window, self.fill_color, self.rect)
+        pygame.draw.rect(main_window, self.fill_color, self.rect, border_radius=40)
 
     def fill_new_color(self, new_color):
-        pygame.draw.rect(main_window, new_color, self.rect)
+        pygame.draw.rect(main_window, new_color, self.rect, border_radius=40)
 
     def outline(self):
-        pygame.draw.rect(main_window, self.frame_color, self.rect, self.thickness)
+        pygame.draw.rect(main_window, self.frame_color, self.rect, self.thickness, border_radius=40)
     def collidepoint(self, x, y):
         return self.rect.collidepoint(x, y)
 
 class LableCard(RectCard):
     def set_text(self, text):
-        self.lable = pygame.font.SysFont('Arial', 28).render(text, True, (0,0,0))
+        self.lable = pygame.font.SysFont('Arial', 22).render(text, True, (0,0,0))
 
     def draw_text(self, shift_x, shift_y):
         self.fill()
@@ -46,16 +46,20 @@ class LableCard(RectCard):
         self.fill()
         self.outline()
 
+list_questhoins = ['Кто?', 'Хочет?', 'Стать?']
+list_answers= [['A: one', 'B: two', 'C: three', 'B: four'],['A: one1', 'B: two1', 'C: three1', 'B: four1'], ['A: one2', 'B: two2', 'C: three2', 'B: four2']]
+list_right_answers = [1, 2, 2]
+
 list_cards = list()
 
 green = (43, 255, 6)
 red = (255, 6, 6)
 x = 20
 for i in range(4):
-    card = LableCard(x, 200, 100, 150, (255, 255, 255))
+    card = LableCard(x, 400, 110, 75, (255, 255, 255))
     card.set_text('Click')
     list_cards.append(card)
-    x+=120
+    x+=115
 
 counter = LableCard(400, 10, 100, 30, back)
 counter.points = 0
@@ -73,26 +77,21 @@ timer.set_text(f'Время: {timer.seconds}')
 start_time = time.time()
 curent_time = time.time()
 
-wait = 0
+curent_question = 0
+
 run = True
 isFinish = True
 while run:
     next_time = time.time()
     if isFinish:
-        counter.draw_text(0,0)
-        timer.draw_text(0,0)
-        if wait == 0:
-            main_window.fill(back)
-            index_card = randint(0, 3)
-            for i in range(len(list_cards)):
-                if index_card == i:
-                    list_cards[i].draw_text(25, 65)
-                else:
-                    list_cards[i].draw()
-            wait = 20
+        main_window.fill(back)
+        counter.draw_text(0, 0)
+        timer.draw_text(0, 0)
 
-        else:
-            wait -=1
+        for i in range(len(list_answers[curent_question])):
+            list_cards[i].set_text(list_answers[curent_question][i])
+            list_cards[i].draw_text(25, 26)
+
 
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
@@ -104,12 +103,13 @@ while run:
                 wait = 0
                 counter.points = 0
                 counter.set_text(f'Счет: {counter.points}')
-            for i in range(len(list_cards)):
+            for i in range(len(list_answers[curent_question])):
                 if list_cards[i].collidepoint(x, y):
-                    if i == index_card:
+                    if i == list_right_answers[curent_question]:
                         counter.points +=1
                         counter.set_text(f'Счет: {counter.points}')
                         list_cards[i].fill_new_color(green)
+                        curent_question+=1
                     else:
                         list_cards[i].fill_new_color(red)
 
