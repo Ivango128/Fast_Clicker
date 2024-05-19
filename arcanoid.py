@@ -54,6 +54,7 @@ class SpriteImg(RectCard):
         super().__init__(x, y, width, height, color, frame_color, thickness)
         self.width = width
         self.height = height
+        self.puth_img = puth_img
         self.image = pygame.transform.scale(pygame.image.load(puth_img), (width, height))
 
     def draw_img(self):
@@ -65,7 +66,7 @@ class BallSprite(SpriteImg):
         self.speed_x = speed
         self.speed_y = speed
     def update(self):
-        if self.rect.y < 0 or self.rect.y > window_h-self.height:
+        if self.rect.y < 0:
             self.speed_y *=-1
         if self.rect.x < 0 or self.rect.x > window_w-self.width:
             self.speed_x *=-1
@@ -83,6 +84,10 @@ class PlatformSprite(SpriteImg):
             self.rect.x += self.speed
         if keys_presed[pygame.K_LEFT]:
             self.rect.x -= self.speed
+    def narrowing(self):
+        self.width -= 2
+        self.rect.width -= 2
+        self.image = pygame.transform.scale(pygame.image.load(self.puth_img), (self.width, self.height))
 
 # размер монстра 50х50
 # 50*9 = 450 9 монстров
@@ -111,12 +116,16 @@ for i in range(row):
     count_monsters -= 1
 
 ball = BallSprite(200, 300, 50, 50, 'ball.png', speed=4)
-platform = PlatformSprite(200, 400, 100, 25, 'platform.png', speed=4)
+platform = PlatformSprite(200, 400, 150, 25, 'platform.png', speed=4)
 
 run = True
 while run:
     main_window.fill(back)
     for monster in monsters:
+        if monster.colliderect(ball.rect):
+            monsters.remove(monster)
+            ball.speed_y *=-1
+            platform.narrowing()
         monster.draw_img()
 
     if ball.colliderect(platform.rect):
@@ -131,6 +140,20 @@ while run:
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             run = False
+
+    if len(monsters) == 0:
+        win_text = LableCard(0, 0, window_w, window_h, (3, 61, 0))
+        win_text.fill_color = (205, 255, 161)
+        win_text.frame_color = (205, 255, 161)
+        win_text.set_text('Ты победил!')
+        win_text.draw_text(window_w / 2.5, window_h / 2.5)
+
+    if ball.rect.y > window_h-ball.height:
+        lose_text = LableCard(0, 0, window_w, window_h, (3, 61, 0))
+        lose_text.fill_color = (205, 255, 161)
+        lose_text.frame_color = (205, 255, 161)
+        lose_text.set_text('Ты проиграл!')
+        lose_text.draw_text(window_w / 2.5, window_h / 2.5)
 
     clock.tick(60)
     pygame.display.update()
